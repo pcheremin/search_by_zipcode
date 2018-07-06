@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+	<meta charset="UTF-8">
+	<title>
+		Moovweb
+	</title>
+
+	<style>
+		body {
+			padding: 20px;
+		}
+
+		.list {
+			margin: 60px 10px;
+			padding: 0px;
+			width: 300px;
+		}
+
+		 li {
+			margin: 10px 0;
+			padding: 5px 0;
+			list-style: none;
+		}
+
+		.done {
+			opacity: 0.5;
+			text-decoration:line-through;
+		}
+
+		span {
+			cursor: pointer;
+			float: right;
+			margin: 0 10px;
+			width: 50px;
+			height: 15px;
+			border: 1px solid gray;
+			font-weight: bold;
+			font-size: 1em;
+			line-height: 1em;
+			text-align: center;
+			color: green;
+		}
+
+		input, button {
+			float: left;
+			margin: 10px;
+		}
+		.text-error {
+			margin: 5px;
+			color: red;
+		}
+	</style>
+
+</head>
+	<body>
+
+	<div class="text-error" id="text-error"></div>
+	<div id="wrapper">
+		<div>
+			<input type="text" name="zipcode" id="zipcode" placeholder="Enter zipcode">
+		</div>
+		<div>
+			<input type="text" name="city" id="city" placeholder="Your City" disabled>
+		</div>
+		<div>
+			<input type="text" name="state" id="state" placeholder="Your State" disabled>
+		</div>
+		<button id="button">ADD to the List</button>
+	</div>
+
+	<ul class="list" id="list">
+		<li>
+			Santa Maria, CA, zip 93454 <span class="select">Select</span>
+		</li>
+		<li>
+			Los Angeles, CA, zip 90001 <span class="select">Select</span>
+		</li>
+		<li>
+			Schenectady, NY, zip 12301 <span class="select">Select</span>
+		</li>
+	</ul>
+
+	<script>
+        let arrayOfZipCode =["93454", "90001", "12301"];
+        let arrayofCity = ["Santa Maria", "Los Angeles", "Schenectady"];
+        let arrayofState = ["CA", "CA", "NY"];
+        let $button = document.getElementById("button");
+        let $zipcode = document.getElementById("zipcode");
+        let $city = document.getElementById("city");
+        let $state = document.getElementById("state");
+        let $list = document.getElementById("list");
+
+        $button.addEventListener("click", AddNewElement);
+
+        function AddNewElement() {
+
+            CheckForSameZip();
+            SelectedElement();
+//            ModifyPresentElement();
+        }
+
+        function CreateNewElement() {
+
+            if ($city.value) {
+                arrayOfZipCode.push($zipcode.value);
+                arrayofCity.push($city.value);
+                arrayofState.push($state.value);
+                let $newLi = document.createElement("li");
+                let $spanOK = document.createElement("span");
+                $list.appendChild($newLi);
+                $newLi.appendChild($spanOK);
+                $newLi.innerHTML = `${$city.value},  ${$state.value}, zip ${$zipcode.value}  <span class="select">Select</span>`;
+                ClearInputs();
+            }
+        }
+
+		function CheckForSameZip() {
+            Error();
+            RemoveAllSelectors()
+            CreateNewElement();
+        }
+
+		function Error() {
+            let $zipcode = document.getElementById("zipcode");
+            arrayOfZipCode.forEach(function (item) {
+
+                if (item === $zipcode.value) {
+                    ClearInputs();
+                }
+            });
+        }
+
+		function SelectedElement() {
+            var $isSelected = document.querySelectorAll(".select");
+            var index;
+            for (let i = 0; i < $isSelected.length; i++){
+                $isSelected[i].addEventListener("click", function () {
+                    RemoveAllSelectors();
+                    if (i === index) {
+                        $isSelected[i].parentNode.classList.remove("done");
+                        ClearInputs();
+                        index = undefined
+					} else {
+                        $isSelected[i].parentNode.classList.add("done");
+                        $zipcode.value = arrayOfZipCode[i];
+                        $city.value = arrayofCity[i];
+                        $state.value = arrayofState[i];
+                        index = i;
+					}
+                });
+            }
+        }
+
+		SelectedElement();
+
+		function ClearInputs() {
+            $zipcode.value = "";
+            $city.value = "";
+            $state.value = "";
+        }
+
+        function RemoveAllSelectors() {
+            var $isSelected = document.querySelectorAll(".select");
+            $isSelected.forEach(function (item) {
+                item.parentNode.classList.remove("done")
+            });
+        }
+
+        function ModifyPresentElement() {
+            var $isSelected = document.querySelectorAll(".select");
+            var $zipcode = document.getElementById("zipcode");
+            for (var i = 0; i < $isSelected.length; i++){
+            if (arrayOfZipCode[i] !== $zipcode.value){
+                arrayOfZipCode[i] = $zipcode.value;
+                arrayofCity[i] = $city.value;
+                arrayofState[i] = $state.value;
+                ClearInputs();
+				console.log(arrayOfZipCode)
+				console.log($zipcode.value)
+			}}
+
+        }
+
+//        var url = "http://api.zippopotam.us/us/10002/?format=json"
+//
+//        fetch(url)
+//            .then(function (res) {
+//                res.json().then(function (data) {
+//
+//
+//                    console.log(data)})
+	</script>
+
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
+		<script type="text/javascript">
+            $(function() {
+                var clientKey = "qeL9OcRTW76KbSFYKp9OgiwwHv4Y1phPEyDdgZuAaIMfIRXHuZPNwnptnV6s4gmk";
+                var cache = {};
+                var container = $("#wrapper");
+                var errorDiv = container.find("div.text-error");
+
+                function handleResp(data)
+                {
+                    if (data.error_msg)
+                        errorDiv.text(data.error_msg);
+                    else if ("city" in data)
+                    {
+                        container.find("input[name='city']").val(data.city);
+                        container.find("input[name='state']").val(data.state);
+                    }
+                }
+
+                container.find("input[name='zipcode']").on("keyup change", function() {
+
+                    var zipcode = $(this).val().substring(0, 5);
+                    if (zipcode.length == 5 && /^[0-9]+$/.test(zipcode))
+                    {
+                        errorDiv.empty();
+
+                        if (zipcode in cache)
+                        {
+                            handleResp(cache[zipcode]);
+                        }
+                        else
+                        {
+                            var url = "https://www.zipcodeapi.com/rest/"+clientKey+"/info.json/" + zipcode + "/radians";
+
+                            $.ajax({
+                                "url": url,
+                                "dataType": "json"
+                            }).done(function(data) {
+                                handleResp(data);
+
+                                cache[zipcode] = data;
+                            }).fail(function(data) {
+                                if (data.responseText && (json = $.parseJSON(data.responseText)))
+                                {
+                                    cache[zipcode] = json;
+
+                                    if (json.error_msg)
+                                        errorDiv.text(json.error_msg);
+                                }
+                                else
+                                    errorDiv.text('Request failed.');
+                            });
+                        }
+                    }
+                }).trigger("change");
+            });
+
+        </script>
+
+	</body>
+</html>
+
+
+
